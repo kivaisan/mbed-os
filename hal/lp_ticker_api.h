@@ -41,6 +41,7 @@ extern "C" {
  *
  * # Undefined behavior
  * * See the @ref hal_ticker_shared "ticker specification"
+ * * Calling any function other than lp_ticker_init after calling lp_ticker_free
  *
  * @see hal_lp_ticker_tests
  *
@@ -111,6 +112,18 @@ void lp_ticker_irq_handler(void);
  * @endcode
  */
 void lp_ticker_init(void);
+
+/** Deinitialize the lower power ticker
+ *
+ * Powerdown the lp ticker in preparation for sleep, powerdown, or reset.
+ *
+ * After calling this function no other ticker functions should be called except
+ * lp_ticker_init(). Calling any function other than init after freeing is
+ * undefined.
+ *
+ * @note This function stops the ticker from counting.
+ */
+void lp_ticker_free(void);
 
 /** Read the current tick
  *
