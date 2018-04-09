@@ -446,6 +446,21 @@ private:
      */
     lorawan_status_t handle_connect(bool is_otaa);
 
+
+    /** Send event to application.
+     *
+     * @param  event            The event to be sent.
+     */
+    void send_event_to_application(const lorawan_event_t event) const;
+
+    /** Send empty uplink message to network.
+     *
+     * Sends an empty confirmed message to gateway.
+     *
+     * @param  port            The event to be sent.
+     */
+    void send_automatic_uplink_message(const uint8_t port);
+
 private:
 
     LoRaMac _loramac;

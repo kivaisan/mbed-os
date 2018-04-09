@@ -1709,6 +1709,8 @@ typedef enum lora_events {
     RX_TIMEOUT,
     RX_ERROR,
     JOIN_FAILURE,
+    UPLINK_REQUIRED,
+    AUTOMATIC_UPLINK_ERROR,
 } lorawan_event_t;
 
 typedef struct  {
