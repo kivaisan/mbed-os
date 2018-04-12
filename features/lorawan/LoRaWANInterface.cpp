@@ -131,3 +131,13 @@ lorawan_status_t LoRaWANInterface::set_device_class(const device_class_t device_
 {
     return stk_obj().set_device_class(device_class);
 }
+
+lorawan_status_t LoRaWANInterface::link_multicast_channel(multicast_params_t *channel_param)
+{
+    return stk_obj().link_multicast_channel(channel_param);
+}
+
+lorawan_status_t LoRaWANInterface::unlink_multicast_channel(multicast_params_t *channel_param)
+{
+    return stk_obj().unlink_multicast_channel(channel_param);
+}

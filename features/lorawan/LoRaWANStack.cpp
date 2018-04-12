@@ -707,6 +707,16 @@ lorawan_status_t LoRaWANStack::set_device_class(const device_class_t& device_cla
     return LORAWAN_STATUS_OK;
 }
 
+lorawan_status_t LoRaWANStack::link_multicast_channel(multicast_params_t *channel_param)
+{
+    return _loramac.multicast_channel_link(channel_param);
+}
+
+lorawan_status_t LoRaWANStack::unlink_multicast_channel(multicast_params_t *channel_param)
+{
+    return _loramac.multicast_channel_unlink(channel_param);
+}
+
 lorawan_status_t LoRaWANStack::lora_state_machine(device_states_t new_state)
 {
     lorawan_status_t status = LORAWAN_STATUS_DEVICE_OFF;

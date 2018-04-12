@@ -366,6 +366,24 @@ public:
      *                          or other negative error code if request failed.
      */
     virtual lorawan_status_t set_device_class(device_class_t device_class) = 0;
+
+    /** Link a multicast channel.
+     *
+     * @param    channel_param    The multicast channel parameters to link.
+     *
+     * @return                    LORAWAN_STATUS_OK on success,
+     *                            or other negative error code if request failed.
+     */
+    virtual lorawan_status_t link_multicast_channel(multicast_params_t *channel_param) = 0;
+
+    /** Unlink a multicast channel.
+     *
+     * @param    channel_param    The multicast channel parameters to unlink.
+     *
+     * @return                    LORAWAN_STATUS_OK on success,
+     *                            or other negative error code if request failed.
+     */
+    virtual lorawan_status_t unlink_multicast_channel(multicast_params_t *channel_param) = 0;
 };
 
 #endif /* LORAWAN_BASE_H_ */

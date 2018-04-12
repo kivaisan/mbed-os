@@ -392,6 +392,24 @@ public:
      */
     lorawan_status_t set_device_class(const device_class_t& device_class);
 
+    /** Link a multicast channel.
+     *
+     * @param    channel_param    The multicast channel parameters to link.
+     *
+     * @return                    LORAWAN_STATUS_OK on success,
+     *                            or other negative error code if request failed.
+     */
+    virtual lorawan_status_t link_multicast_channel(multicast_params_t *channel_param);
+
+    /** Unlink a multicast channel.
+     *
+     * @param    channel_param    The multicast channel parameters to unlink.
+     *
+     * @return                    LORAWAN_STATUS_OK on success,
+     *                            or other negative error code if request failed.
+     */
+    virtual lorawan_status_t unlink_multicast_channel(multicast_params_t *channel_param);
+
 private:
     LoRaWANStack();
     ~LoRaWANStack();
