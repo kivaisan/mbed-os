@@ -78,6 +78,7 @@ LoRaMac::LoRaMac()
       _mlme_confirmation(),
       _is_nwk_joined(false),
       _continuous_rx2_window_open(false),
+      _rx1_closed(true),
       _device_class(CLASS_A)
 {
     _params.keys.dev_eui = NULL;
@@ -665,6 +666,8 @@ void LoRaMac::on_radio_tx_done(lorawan_time_t timestamp)
 void LoRaMac::on_radio_rx_done(const uint8_t *const payload, uint16_t size,
                                int16_t rssi, int8_t snr)
 {
+    _rx1_closed = true;
+
     if (_device_class == CLASS_C && !_continuous_rx2_window_open) {
         open_rx2_window();
     } else if (_device_class != CLASS_C){
@@ -734,6 +737,8 @@ void LoRaMac::on_radio_rx_timeout(bool is_timeout)
     }
 
     if (_params.rx_slot == RX_SLOT_WIN_1) {
+        _rx1_closed = true;
+
         if (_params.is_node_ack_requested == true) {
             _mcps_confirmation.status = is_timeout ?
                                         LORAMAC_EVENT_INFO_STATUS_RX1_TIMEOUT :
@@ -854,6 +859,7 @@ void LoRaMac::open_rx1_window(void)
 {
     Lock lock(*this);
     _continuous_rx2_window_open = false;
+    _rx1_closed = false;
     _lora_time.stop(_params.timers.rx_window1_timer);
     _params.rx_slot = RX_SLOT_WIN_1;
 
@@ -879,30 +885,36 @@ void LoRaMac::open_rx1_window(void)
 void LoRaMac::open_rx2_window()
 {
     Lock lock(*this);
-    _continuous_rx2_window_open = true;
     _lora_time.stop(_params.timers.rx_window2_timer);
 
-    _params.rx_window2_config.channel = _params.channel;
-    _params.rx_window2_config.frequency = _params.sys_params.rx2_channel.frequency;
-    _params.rx_window2_config.dl_dwell_time = _params.sys_params.downlink_dwell_time;
-    _params.rx_window2_config.is_repeater_supported = _params.is_repeater_supported;
+    if (_rx1_closed) {
+        _continuous_rx2_window_open = true;
 
-    if (get_device_class() == CLASS_C) {
-        _params.rx_window2_config.is_rx_continuous = true;
+        _params.rx_window2_config.channel = _params.channel;
+        _params.rx_window2_config.frequency = _params.sys_params.rx2_channel.frequency;
+        _params.rx_window2_config.dl_dwell_time = _params.sys_params.downlink_dwell_time;
+        _params.rx_window2_config.is_repeater_supported = _params.is_repeater_supported;
+
+        if (get_device_class() == CLASS_C) {
+            _params.rx_window2_config.is_rx_continuous = true;
+        } else {
+            _params.rx_window2_config.is_rx_continuous = false;
+        }
+
+        _params.rx_window2_config.rx_slot = _params.rx_window2_config.is_rx_continuous ?
+                                            RX_SLOT_WIN_CLASS_C : RX_SLOT_WIN_2;
+
+        _mcps_indication.rx_datarate = _params.rx_window2_config.datarate;
+
+        _lora_phy->rx_config(&_params.rx_window2_config);
+        _lora_phy->handle_receive();
+        _params.rx_slot = _params.rx_window2_config.rx_slot;
+
+        tr_debug("Opening RX2 Window, Frequency = %lu", _params.rx_window2_config.frequency);
     } else {
-        _params.rx_window2_config.is_rx_continuous = false;
+        // If RX1 has already detected the preamble but reception has not completed
+        tr_info("Skipping RX2 Window as RX1 might be receiving already");
     }
-
-    _params.rx_window2_config.rx_slot = _params.rx_window2_config.is_rx_continuous ?
-                                        RX_SLOT_WIN_CLASS_C : RX_SLOT_WIN_2;
-
-    _mcps_indication.rx_datarate = _params.rx_window2_config.datarate;
-
-    _lora_phy->rx_config(&_params.rx_window2_config);
-    _lora_phy->handle_receive();
-    _params.rx_slot = _params.rx_window2_config.rx_slot;
-
-    tr_debug("Opening RX2 Window, Frequency = %lu", _params.rx_window2_config.frequency);
 }
 
 void LoRaMac::on_ack_timeout_timer_event(void)
@@ -1800,6 +1812,8 @@ void LoRaMac::disconnect()
     _lora_time.stop(_params.timers.ack_timeout_timer);
 
     _lora_phy->put_radio_to_sleep();
+
+    _rx1_closed = true;
 
     _is_nwk_joined = false;
     _params.is_ack_retry_timeout_expired = false;

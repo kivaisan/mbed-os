@@ -671,6 +671,8 @@ private:
 
     bool _continuous_rx2_window_open;
 
+    bool _rx1_closed;
+
     device_class_t _device_class;
 
 #if defined(LORAWAN_COMPLIANCE_TEST)
