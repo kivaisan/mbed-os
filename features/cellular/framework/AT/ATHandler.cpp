@@ -159,13 +159,16 @@ void ATHandler::set_is_filehandle_usable(bool usable)
 
 nsapi_error_t ATHandler::set_urc_handler(const char *prefix, mbed::Callback<void()> callback)
 {
+    lock();
     if (find_urc_handler(prefix, &callback)) {
         tr_warn("URC already added with prefix: %s", prefix);
+        unlock();
         return NSAPI_ERROR_OK;
     }
 
     struct oob_t *oob = new struct oob_t;
     if (!oob) {
+        unlock();
         return NSAPI_ERROR_NO_MEMORY;
     } else {
         size_t prefix_len = strlen(prefix);
@@ -182,12 +185,13 @@ nsapi_error_t ATHandler::set_urc_handler(const char *prefix, mbed::Callback<void
         oob->next = _oobs;
         _oobs = oob;
     }
-
+    unlock();
     return NSAPI_ERROR_OK;
 }
 
 void ATHandler::remove_urc_handler(const char *prefix, mbed::Callback<void()> callback)
 {
+    lock();
     struct oob_t *current = _oobs;
     struct oob_t *prev = NULL;
     while (current) {
@@ -203,6 +207,7 @@ void ATHandler::remove_urc_handler(const char *prefix, mbed::Callback<void()> ca
         prev = current;
         current = prev->next;
     }
+    unlock();
 }
 
 bool ATHandler::find_urc_handler(const char *prefix, mbed::Callback<void()> *callback)
@@ -1138,10 +1143,32 @@ bool ATHandler::check_cmd_send()
 
 void ATHandler::flush()
 {
+    lock();
     reset_buffer();
     while (fill_buffer(false)) {
         reset_buffer();
     }
+    unlock();
+}
+
+bool ATHandler::sync()
+{
+    set_at_timeout(1000);
+    // poll for 10 seconds
+    for (int i=0; i<10; i++) {
+        lock();
+        cmd_start("AT+CMEE?"); // use an AT command that is supported by all modems and likely not used elsewhere
+        cmd_stop();
+        resp_start("+CMEE:");
+        resp_stop();
+        unlock();
+        if (!_last_err) {
+            restore_at_timeout();
+            return true;
+        }
+    }
+    restore_at_timeout();
+    return false;
 }
 
 void ATHandler::debug_print(char *p, int len)
