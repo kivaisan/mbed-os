@@ -15,26 +15,25 @@
  * limitations under the License.
  */
 
-#ifndef QUECTEL_BC95_H_
-#define QUECTEL_BC95_H_
+#include "QUECTEL_BC95_CellularSMS.h"
+#include "CellularLog.h"
 
-#include "AT_CellularDevice.h"
+using namespace mbed;
 
-namespace mbed {
+QUECTEL_BC95_CellularSMS::QUECTEL_BC95_CellularSMS(ATHandler &atHandler) : AT_CellularSMS(atHandler)
+{
+    _mode = CellularSMSMmodePDU;
+}
 
-class QUECTEL_BC95 : public AT_CellularDevice {
-public:
-    QUECTEL_BC95(events::EventQueue &queue);
-    virtual ~QUECTEL_BC95();
+QUECTEL_BC95_CellularSMS::~QUECTEL_BC95_CellularSMS()
+{
+}
 
-protected: // AT_CellularDevice
-    virtual AT_CellularNetwork *open_network_impl(ATHandler &at);
-    virtual AT_CellularPower *open_power_impl(ATHandler &at);
-    virtual AT_CellularSIM *open_sim_impl(ATHandler &at);
-    virtual AT_CellularSMS *open_sms_impl(ATHandler &at);
-
-public: // NetworkInterface
-    void handle_urc(FileHandle *fh);
-};
-} // namespace mbed
-#endif // QUECTEL_BC95_H_
+nsapi_error_t QUECTEL_BC95_CellularSMS::initialize(CellularSMSMmode mode)
+{
+    if (mode == CellularSMSMmodePDU) {
+        return NSAPI_ERROR_OK;
+    } else {
+        return NSAPI_ERROR_UNSUPPORTED;
+    }
+}

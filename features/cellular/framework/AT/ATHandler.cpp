@@ -943,7 +943,7 @@ bool ATHandler::consume_to_tag(const char *tag, bool consume_tag)
         int c = get_char();
         if (c == -1) {
             break;
-        } else if (c == tag[match_pos]) {
+        } else if (c == tag[match_pos] || ((match_pos = 1) && (c == tag[--match_pos]))) {
             match_pos++;
             if (match_pos == strlen(tag)) {
                 if (!consume_tag) {
@@ -951,8 +951,6 @@ bool ATHandler::consume_to_tag(const char *tag, bool consume_tag)
                 }
                 return true;
             }
-        } else if (match_pos) {
-            match_pos = 0;
         }
     }
     tr_debug("consume_to_tag not found");
@@ -1172,13 +1170,14 @@ void ATHandler::debug_print(char *p, int len)
             char c = *p++;
             if (!isprint(c)) {
                 if (c == '\r') {
-                    debug("\n");
+                    debug("\\r\n");
                 } else if (c == '\n') {
+                    debug("\\n");
                 } else {
                     debug("[%d]", c);
                 }
             } else {
-                debug("%c", c);
+                debug("%c(%02X)", c, c);
             }
         }
 #if MBED_CONF_MBED_TRACE_ENABLE

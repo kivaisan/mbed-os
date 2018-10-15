@@ -493,8 +493,11 @@ nsapi_size_or_error_t AT_CellularSMS::send_sms(const char *phone_number, const c
             wait_ms(_sim_wait_time);
             _at.resp_start("> ", true);
 
+            printf("KPV: get_last_error = %d\r\n", _at.get_last_error());
+
             if (_at.get_last_error() == NSAPI_ERROR_OK) {
                 write_size = _at.write_bytes((uint8_t *)pdu_str, pdu_len);
+                printf("KPV: write_size = %d\r\n", write_size);
                 if (write_size < pdu_len) {
                     // calculate exact size of what we have send
                     if (write_size <= header_len) {
@@ -541,6 +544,9 @@ void AT_CellularSMS::set_sms_callback(Callback<void()> func)
 
 nsapi_error_t AT_CellularSMS::set_cpms(const char *memr, const char *memw, const char *mems)
 {
+    if (!is_supported(AT_CPMS)) {
+        return NSAPI_ERROR_UNSUPPORTED;
+    }
     _at.lock();
     _at.cmd_start("AT+CPMS=");
     _at.write_string(memr);
@@ -568,6 +574,9 @@ nsapi_error_t AT_CellularSMS::set_csca(const char *sca, int type)
 
 nsapi_size_or_error_t AT_CellularSMS::set_cscs(const char *chr_set)
 {
+    if (!is_supported(AT_CSCS)) {
+        return NSAPI_ERROR_UNSUPPORTED;
+    }
     _at.lock();
     _at.cmd_start("AT+CSCS=");
     _at.write_string(chr_set);

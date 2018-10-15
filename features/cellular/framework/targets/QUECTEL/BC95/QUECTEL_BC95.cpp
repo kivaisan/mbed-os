@@ -18,6 +18,7 @@
 #include "QUECTEL_BC95_CellularNetwork.h"
 #include "QUECTEL_BC95_CellularPower.h"
 #include "QUECTEL_BC95_CellularSIM.h"
+#include "QUECTEL_BC95_CellularSMS.h"
 
 #include "QUECTEL_BC95.h"
 
@@ -32,7 +33,12 @@ using namespace events;
 using namespace mbed;
 
 static const AT_CellularBase::SupportedFeature unsupported_features[] =  {
-    AT_CellularBase::AT_CGAUTH, // BC95_AT_Commands_Manual_V1.9
+    AT_CellularBase::AT_CGAUTH, // BC95_AT_Commands_Manual_V1.9,
+
+    /* SMS */
+    AT_CellularBase::AT_CPMS,
+    AT_CellularBase::AT_CSCS,
+
     AT_CellularBase::SUPPORTED_FEATURE_END_MARK
 };
 
@@ -58,4 +64,9 @@ AT_CellularPower *QUECTEL_BC95::open_power_impl(ATHandler &at)
 AT_CellularSIM *QUECTEL_BC95::open_sim_impl(ATHandler &at)
 {
     return new QUECTEL_BC95_CellularSIM(at);
+}
+
+AT_CellularSMS *QUECTEL_BC95::open_sms_impl(ATHandler &at)
+{
+    return new QUECTEL_BC95_CellularSMS(at);
 }

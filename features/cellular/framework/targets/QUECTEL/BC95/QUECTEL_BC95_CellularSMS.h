@@ -15,26 +15,22 @@
  * limitations under the License.
  */
 
-#ifndef QUECTEL_BC95_H_
-#define QUECTEL_BC95_H_
+#ifndef QUECTEL_BC95_CELLULAR_SMS_H_
+#define QUECTEL_BC95_CELLULAR_SMS_H_
 
-#include "AT_CellularDevice.h"
+#include "AT_CellularSMS.h"
 
 namespace mbed {
 
-class QUECTEL_BC95 : public AT_CellularDevice {
+class QUECTEL_BC95_CellularSMS : public AT_CellularSMS {
 public:
-    QUECTEL_BC95(events::EventQueue &queue);
-    virtual ~QUECTEL_BC95();
+    QUECTEL_BC95_CellularSMS(ATHandler &atHandler);
+    virtual ~QUECTEL_BC95_CellularSMS();
 
-protected: // AT_CellularDevice
-    virtual AT_CellularNetwork *open_network_impl(ATHandler &at);
-    virtual AT_CellularPower *open_power_impl(ATHandler &at);
-    virtual AT_CellularSIM *open_sim_impl(ATHandler &at);
-    virtual AT_CellularSMS *open_sms_impl(ATHandler &at);
-
-public: // NetworkInterface
-    void handle_urc(FileHandle *fh);
+public: //from CellularSMS
+    virtual nsapi_error_t initialize(CellularSMSMmode mode);
 };
+
 } // namespace mbed
-#endif // QUECTEL_BC95_H_
+
+#endif // QUECTEL_BC95_CELLULAR_SMS_H_
