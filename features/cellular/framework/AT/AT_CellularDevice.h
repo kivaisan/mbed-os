@@ -71,7 +71,7 @@ public:
 
     virtual void close_information();
 
-    virtual void set_timeout(int timeout);
+    virtual void set_timeout(int timeout, bool set_to_statemachine = true);
 
     virtual uint16_t get_send_delay() const;
 

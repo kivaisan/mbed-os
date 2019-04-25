@@ -334,9 +334,10 @@ public:
      *
      *  @remark CellularStateMachine timeouts for all states are also changed to `timeout`.
      *
-     *  @param timeout    milliseconds to wait response from modem
+     *  @param timeout              milliseconds to wait response from modem
+     *  @param set_to_statemachine  set timeout as default for all state machine states
      */
-    virtual void set_timeout(int timeout) = 0;
+    virtual void set_timeout(int timeout, bool set_to_statemachine = true) = 0;
 
     /** Set an array of timeouts to wait before CellularStateMachine retries after failure.
      *  To disable retry behavior completely use `set_retry_timeout_array(NULL, 0)`.

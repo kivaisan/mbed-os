@@ -339,13 +339,13 @@ void AT_CellularDevice::close_information()
     }
 }
 
-void AT_CellularDevice::set_timeout(int timeout)
+void AT_CellularDevice::set_timeout(int timeout, bool set_to_statemachine)
 {
     _default_timeout = timeout;
 
     ATHandler::set_at_timeout_list(_default_timeout, true);
 
-    if (_state_machine) {
+    if (set_to_statemachine && _state_machine) {
         _state_machine->set_timeout(_default_timeout);
     }
 }

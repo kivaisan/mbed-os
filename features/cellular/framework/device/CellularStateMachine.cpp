@@ -305,7 +305,7 @@ void CellularStateMachine::retry_state_or_fail()
 
 void CellularStateMachine::state_init()
 {
-    _cellularDevice.set_timeout(_state_timeout_power_on);
+    _cellularDevice.set_timeout(_state_timeout_power_on, false);
     tr_info("Start connecting (timeout %d ms)", _state_timeout_power_on);
     _cb_data.error = _cellularDevice.is_ready();
     _status = _cb_data.error ? 0 : DEVICE_READY;
@@ -322,7 +322,7 @@ void CellularStateMachine::state_init()
 
 void CellularStateMachine::state_power_on()
 {
-    _cellularDevice.set_timeout(_state_timeout_power_on);
+    _cellularDevice.set_timeout(_state_timeout_power_on, false);
     tr_info("Modem power ON (timeout %d ms)", _state_timeout_power_on);
     if (power_on()) {
         enter_to_state(STATE_DEVICE_READY);
@@ -354,7 +354,7 @@ bool CellularStateMachine::device_ready()
 
 void CellularStateMachine::state_device_ready()
 {
-    _cellularDevice.set_timeout(_state_timeout_power_on);
+    _cellularDevice.set_timeout(_state_timeout_power_on, false);
     if (!(_status & DEVICE_READY)) {
         tr_debug("Device was not ready, calling soft_power_on()");
         _cb_data.error = _cellularDevice.soft_power_on();
@@ -378,7 +378,7 @@ void CellularStateMachine::state_device_ready()
 
 void CellularStateMachine::state_sim_pin()
 {
-    _cellularDevice.set_timeout(_state_timeout_sim_pin);
+    _cellularDevice.set_timeout(_state_timeout_sim_pin, false);
     tr_info("Setup SIM (timeout %d ms)", _state_timeout_sim_pin);
     if (open_sim()) {
         bool success = false;
@@ -433,7 +433,7 @@ void CellularStateMachine::state_signal_quality()
 
 void CellularStateMachine::state_registering()
 {
-    _cellularDevice.set_timeout(_state_timeout_network);
+    _cellularDevice.set_timeout(_state_timeout_network, false);
     if (is_registered()) {
         if (_cb_data.status_data != CellularNetwork::RegisteredHomeNetwork &&
                 _cb_data.status_data != CellularNetwork::RegisteredRoaming && _status) {
@@ -446,7 +446,7 @@ void CellularStateMachine::state_registering()
         enter_to_state(STATE_ATTACHING_NETWORK);
     } else {
         tr_info("Network registration (timeout %d ms)", _state_timeout_registration);
-        _cellularDevice.set_timeout(_state_timeout_registration);
+        _cellularDevice.set_timeout(_state_timeout_registration, false);
         if (!_command_success && !_plmn) { // don't call set_registration twice for manual registration
             _cb_data.error = _network.set_registration(_plmn);
             _command_success = (_cb_data.error == NSAPI_ERROR_OK);
@@ -458,7 +458,7 @@ void CellularStateMachine::state_registering()
 void CellularStateMachine::state_attaching()
 {
     if (_status != ATTACHED_TO_NETWORK) {
-        _cellularDevice.set_timeout(_state_timeout_connect);
+        _cellularDevice.set_timeout(_state_timeout_connect, false);
         tr_info("Attaching network (timeout %d ms)", _state_timeout_connect);
         _cb_data.error = _network.set_attach();
     }
