@@ -115,6 +115,8 @@ ATHandler::ATHandler(FileHandle *fh, EventQueue &queue, uint32_t timeout, const 
 ATHandler::~ATHandler()
 {
     ScopedLock <ATHandler> lock(*this);
+
+    set_is_filehandle_usable(false);
     _fileHandle = NULL;
 
     if (_event_id != 0 && _queue.cancel(_event_id)) {
