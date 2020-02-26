@@ -35,6 +35,8 @@ TARGET_PREFIX:=../
 TARGET_SRC:=$(TARGET_PREFIX)src
 TARGET_INC:=$(TARGET_PREFIX)inc
 TARGET_TESTS:=$(TARGET_PREFIX)TESTS
+TARGET_CRYPTO:=$(TARGET_PREFIX)mbed-crypto
+TARGET_TINYCRYPT:=$(TARGET_PREFIX)tinycrypt
 
 # mbed TLS source directory - hidden from mbed via TARGET_IGNORE
 MBED_TLS_DIR:=TARGET_IGNORE/mbedtls
@@ -46,6 +48,27 @@ MBED_TLS_GIT_CFG=$(MBED_TLS_DIR)/.git/config
 all: mbedtls
 
 mbedtls: deploy
+
+baremetal: deploy
+	#
+	# Remove mbed-crypto
+	rm -rf $(TARGET_CRYPTO)/src
+	rm -rf $(TARGET_CRYPTO)/inc
+	#
+	# Copy tinycrypt
+	rsync -a --exclude='*.txt' $(MBED_TLS_DIR)/tinycrypt/ $(TARGET_TINYCRYPT)
+	# Copy tinycrypt headers
+	mkdir -p $(TARGET_INC)/tinycrypt
+	rsync -a --exclude='*.txt' $(MBED_TLS_DIR)/include/tinycrypt/ $(TARGET_INC)/tinycrypt
+	#
+	# Add some x509 files to .mbedignore as these files are #include'd in x509.c
+	echo src/x509_crl.c >> ../.mbedignore
+	echo src/x509_crt.c >> ../.mbedignore
+	echo src/x509_csr.c >> ../.mbedignore
+	echo src/x509_create.c >> ../.mbedignore
+	echo src/x509write_crt.c >> ../.mbedignore
+	echo src/x509write_csr.c >> ../.mbedignore
+	#
 
 rsync:
 	#
